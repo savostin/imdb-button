@@ -1,0 +1,70 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 100 40" width="100" id="imdb" title="???">
+	<style>
+		svg { font-family: 'Roboto Condensed', Arial, Helvetica, sans-serif; cursor: pointer; }
+		#count { transform:translate(95px, 3.7em); text-anchor: end; font-size: 0.6em; user-select: none; }
+		#rating { transform:translate(95px, 1em); text-anchor: end; font-size: 1.5em; font-weight: bold; letter-spacing: -0.07em; user-select: none; }
+		#logo { transform: translate(7px, 7px); fill: #000000; fill-rule:nonzero; }
+	</style>
+	<g>
+		<title id="title"></title>
+		<g fill="#F5C518"><rect x="0" y="0" width="100%" height="100%" rx="6"></rect></g>
+		<g id="logo">
+			<polygon points="0 18 5 18 5 0 0 0"></polygon>
+			<path d="M15.6725178,0 L14.5534833,8.40846934 L13.8582008,3.83502426 C13.65661,2.37009263 13.4632474,1.09175121 13.278113,0 L7,0 L7,18 L11.2416347,18 L11.2580911,6.11380679 L13.0436094,18 L16.0633571,18 L17.7583653,5.8517865 L17.7707076,18 L22,18 L22,0 L15.6725178,0 Z"></path>
+			<path d="M24,18 L24,0 L31.8045586,0 C33.5693522,0 35,1.41994415 35,3.17660424 L35,14.8233958 C35,16.5777858 33.5716617,18 31.8045586,18 L24,18 Z M29.8322479,3.2395236 C29.6339219,3.13233348 29.2545158,3.08072342 28.7026524,3.08072342 L28.7026524,14.8914865 C29.4312846,14.8914865 29.8796736,14.7604764 30.0478195,14.4865461 C30.2159654,14.2165858 30.3021941,13.486105 30.3021941,12.2871637 L30.3021941,5.3078959 C30.3021941,4.49404499 30.272014,3.97397442 30.2159654,3.74371416 C30.1599168,3.5134539 30.0348852,3.34671372 29.8322479,3.2395236 Z"></path>
+			<path d="M44.4299079,4.50685823 L44.749518,4.50685823 C46.5447098,4.50685823 48,5.91267586 48,7.64486762 L48,14.8619906 C48,16.5950653 46.5451816,18 44.749518,18 L44.4299079,18 C43.3314617,18 42.3602746,17.4736618 41.7718697,16.6682739 L41.4838962,17.7687785 L37,17.7687785 L37,0 L41.7843263,0 L41.7843263,5.78053556 C42.4024982,5.01015739 43.3551514,4.50685823 44.4299079,4.50685823 Z M43.4055679,13.2842155 L43.4055679,9.01907814 C43.4055679,8.31433946 43.3603268,7.85185468 43.2660746,7.63896485 C43.1718224,7.42607505 42.7955881,7.2893916 42.5316822,7.2893916 C42.267776,7.2893916 41.8607934,7.40047379 41.7816216,7.58767002 L41.7816216,9.01907814 L41.7816216,13.4207851 L41.7816216,14.8074788 C41.8721037,15.0130276 42.2602358,15.1274059 42.5316822,15.1274059 C42.8031285,15.1274059 43.1982131,15.0166981 43.281155,14.8074788 C43.3640968,14.5982595 43.4055679,14.0880581 43.4055679,13.2842155 Z"></path>
+		</g>
+		<text id="rating"></text>
+		<text id="count"></text>
+	</g>
+	<script>//<![CDATA[
+const svg = document.getElementById('imdb');
+const compactInteger=function(e,t=0){t=Math.max(t,0);const n=parseInt(e,10),i=n<0?"-":"",r=Math.abs(n),l=String(r),o=l.length,$=[13,10,7,4],a=["T","B","M","k"];if(r<1e3)return`${i}${l}`;if(o>$[0]+3)return n.toExponential(t).replace("e+","x10^");let c;for(let e=0;e<$.length;e++){const t=$[e];if(o>=t){c=t;break}}const s=o-c+1,f=l.split(""),g=f.slice(0,s),h=f.slice(s,s+t+1),x=g.join("");let p,u=h.join("");if(u.length<t&&(u+=`${Array(t-u.length+1).join("0")}`),0===t)p=`${i}${x}${a[$.indexOf(c)]}`;else{p=`${i}${Number(`${x}.${u}`).toFixed(t)}${a[$.indexOf(c)]}`}return p};
+const imdb = {
+	rating: {
+		tick: function() {
+			imdb.rating.cur += 0.1;
+			document.getElementById("rating").textContent = imdb.rating.cur.toFixed(1);
+			if(imdb.rating.cur >= imdb.rating.rating - 0.01) {
+				window.clearInterval(imdb.rating.go);
+				document.getElementById("count").textContent = compactInteger(imdb.rating.count, 1);
+			}
+		},
+		run: function (data) {
+			imdb.rating.rating = data?.resource?.rating || 0;
+			if (imdb.rating.rating) {
+				document.getElementById('title').textContent = data?.resource?.title;
+				imdb.rating.cur = 0.0;
+				imdb.rating.count = data?.resource?.ratingCount || 0;
+				imdb.rating.go = window.setInterval(imdb.rating.tick, 20);
+				svg.addEventListener("click", (e) => {
+					window.open(`https://imdb.com${data?.resource?.id}`, '_blank', 'noopener,noreferrer').focus();
+				});
+				console.debug(`[IMDB] Loaded '${data?.resource?.title}': ${imdb.rating.rating} / ${imdb.rating.count} }`)
+			} else {
+				console.error('[IMDB] No rating data found. Bye!')
+				svg.parentNode.removeChild(svg)
+			}
+		},
+	},
+};
+(function() {
+	let id = (window.location.pathname.match(/\/(tt\d+)/) || [])[1];
+	if(!id) {
+		const urlParams = new URLSearchParams(window.location.search);
+		id = (urlParams.get('id').match(/^tt\d+$/) || [])[0];
+	}
+	console.debug(`[IMDB] Loading ${id}...`)
+	if(id) {
+		var script = document.createElementNS('http://www.w3.org/2000/svg', 'script');
+		script.setAttributeNS('http://www.w3.org/1999/xlink', 'xlink:href', `https://p.media-imdb.com/static-content/documents/v1/title/${id}/ratings%3Fjsonp=imdb.rating.run:imdb.api.title.ratings/data.json?`);
+		svg.appendChild(script);
+		} else {
+			console.error('[IMDB] Unable to find id. Bye!')
+			svg.parentNode.removeChild(svg)
+		}
+})();
+
+    //]]>
+    </script>
+</svg>
