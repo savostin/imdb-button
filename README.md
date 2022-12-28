@@ -19,4 +19,4 @@ with something like that in your Nginx config:
 </location>
 ```
 
-![Hosted example](https://rating.rumdb.com/)
+[Hosted example](https://rating.rumdb.com/)
