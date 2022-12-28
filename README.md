@@ -18,3 +18,5 @@ with something like that in your Nginx config:
 	rewrite /(tt[0-9]+)\.svg$ imdb.svg?id=$1& break;
 </location>
 ```
+
+![Hosted example](https://rating.rumdb.com/)
