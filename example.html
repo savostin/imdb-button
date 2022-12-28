@@ -1,17 +1,20 @@
 <!DOCTYPE html>
 <html>
 <head>
+	<style>
+		ul.films li {display: flex; flex-direction: column; align-items: center; margin-bottom: 1em;}
+	</style>
 <meta charset="UTF-8">
 <title>IMDB button example</title>
 </head>
 
 <body>
-	<ul>
-	<li>The Fabelmans: <object type="image/svg+xml" data="imdb.svg?id=tt14208870" /></li>
-	<li>Top Gun: Maverick: <object type="image/svg+xml" data="imdb.svg?id=tt1745960" /></li>
-	<li>Daniel the Wizard: <object type="image/svg+xml" data="imdb.svg?id=tt0421051" /></li>
-	<li>Jaws: The Revenge: <object type="image/svg+xml" data="imdb.svg?id=tt0093300" /></li>
-	<li>F9: The Fast Saga: <object type="image/svg+xml" data="imdb.svg?id=tt5433138" /></li>
+	<ul class="films">
+	<li><b>The Fabelmans:</b> <object type="image/svg+xml" data="imdb.svg?id=tt14208870"></object></li>
+	<li><b>Top Gun: Maverick:</b> <object type="image/svg+xml" data="imdb.svg?id=tt1745960"></object></li>
+	<li><b>Daniel the Wizard:</b> <object type="image/svg+xml" data="imdb.svg?id=tt0421051"></object></li>
+	<li><b>Jaws: The Revenge:</b> <object type="image/svg+xml" data="imdb.svg?id=tt0093300"></object></li>
+	<li><b>F9: The Fast Saga:</b> <object type="image/svg+xml" data="imdb.svg?id=tt5433138"></object></li>
 	</ul>
 </body>
 
