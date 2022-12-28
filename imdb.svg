@@ -20,6 +20,7 @@
 	<script>//<![CDATA[
 const svg = document.getElementById('imdb');
 const compactInteger=function(e,t=0){t=Math.max(t,0);const n=parseInt(e,10),i=n<0?"-":"",r=Math.abs(n),l=String(r),o=l.length,$=[13,10,7,4],a=["T","B","M","k"];if(r<1e3)return`${i}${l}`;if(o>$[0]+3)return n.toExponential(t).replace("e+","x10^");let c;for(let e=0;e<$.length;e++){const t=$[e];if(o>=t){c=t;break}}const s=o-c+1,f=l.split(""),g=f.slice(0,s),h=f.slice(s,s+t+1),x=g.join("");let p,u=h.join("");if(u.length<t&&(u+=`${Array(t-u.length+1).join("0")}`),0===t)p=`${i}${x}${a[$.indexOf(c)]}`;else{p=`${i}${Number(`${x}.${u}`).toFixed(t)}${a[$.indexOf(c)]}`}return p};
+!function(t,e){"object"==typeof exports&&"object"==typeof module?module.exports=e():"function"==typeof define&&define.amd?define([],e):"object"==typeof exports?exports.ls=e():t.ls=e()}(this,(function(){return(()=>{"use strict";var t={d:(e,r)=>{for(var n in r)t.o(r,n)&&!t.o(e,n)&&Object.defineProperty(e,n,{enumerable:!0,get:r[n]})},o:(t,e)=>Object.prototype.hasOwnProperty.call(t,e)},e={};t.d(e,{default:()=>p});const r=(...t)=>{},n=t=>null!==t&&"Object"===t.constructor.name;let c;const o=()=>{if(void 0!==c)return c;c=!0;try{localStorage||(c=!1)}catch(t){c=!1}return i(),c},l=String.fromCharCode(0),a=(t,e,r=!0)=>r?[...JSON.stringify(t)].map((t=>String.fromCharCode(t.charCodeAt(0)+e))).join(""):JSON.parse([...t].map((t=>String.fromCharCode(t.charCodeAt(0)-e))).join("")),s={ttl:null,encrypt:!1,encrypter:a,decrypter:(t,e)=>a(t,e,!1),secret:75},i=(t=!1)=>{if(!o())return!1;Object.keys(localStorage).forEach((e=>{const r=localStorage.getItem(e);if(!r)return;let c;try{c=JSON.parse(r)}catch(t){return}n(c)&&l in c&&(Date.now()>c.ttl||t)&&localStorage.removeItem(e)}))},p={config:s,set:(t,e,n={})=>{if(!o())return!1;const c=Object.assign(Object.assign(Object.assign({},s),n),{encrypt:!1!==n.encrypt&&(n.encrypt||s.encrypt),ttl:null===n.ttl?null:n.ttl||s.ttl});try{const n=c.ttl&&!isNaN(c.ttl)&&c.ttl>0;let o=n?{[l]:e,ttl:Date.now()+1e3*c.ttl}:e;c.encrypt&&(n?o[l]=(c.encrypter||r)(o[l],c.secret):o=(c.encrypter||r)(o,c.secret)),localStorage.setItem(t,JSON.stringify(o))}catch(t){return!1}},get:(t,e={})=>{if(!o())return null;const c=localStorage.getItem(t);if(!c)return null;const a=Object.assign(Object.assign(Object.assign({},s),e),{encrypt:!1!==e.encrypt&&(e.encrypt||s.encrypt),ttl:null===e.ttl?null:e.ttl||s.ttl});let i=JSON.parse(c);const p=n(i)&&l in i;if(a.decrypt||a.encrypt)try{p?i[l]=(a.decrypter||r)(i[l],a.secret):i=(a.decrypter||r)(i,a.secret)}catch(t){}return p?Date.now()>i.ttl?(localStorage.removeItem(t),null):i[l]:i},flush:i,clear:()=>{if(!o())return!1;localStorage.clear()},remove:t=>{if(!o())return!1;localStorage.removeItem(t)}};return e.default})()}));
 const imdb = {
 	rating: {
 		tick: function() {
@@ -31,8 +32,9 @@ const imdb = {
 			}
 		},
 		run: function (data) {
+			imdb.rating.id = (data?.resource?.id.match(/\/(tt\d+)/) || [])[1];
 			imdb.rating.rating = data?.resource?.rating || 0;
-			if (imdb.rating.rating) {
+			if (imdb.rating.id && imdb.rating.rating) {
 				document.getElementById('title').textContent = data?.resource?.title;
 				imdb.rating.cur = 0.0;
 				imdb.rating.count = data?.resource?.ratingCount || 0;
@@ -40,6 +42,7 @@ const imdb = {
 				svg.addEventListener("click", (e) => {
 					window.open(`https://imdb.com${data?.resource?.id}`, '_blank', 'noopener,noreferrer').focus();
 				});
+				ls.set(imdb.rating.id, {id: data?.resource?.id, title: data?.resource?.title, rating: imdb.rating.rating, count: imdb.rating.count}, {ttl: 24*60*60});
 				console.debug(`[IMDB] Loaded '${data?.resource?.title}': ${imdb.rating.rating} / ${imdb.rating.count} }`)
 			} else {
 				console.error('[IMDB] No rating data found. Bye!')
@@ -54,8 +57,14 @@ const imdb = {
 		const urlParams = new URLSearchParams(window.location.search);
 		id = (urlParams.get('id').match(/^tt\d+$/) || [])[0];
 	}
-	console.debug(`[IMDB] Loading ${id}...`)
 	if(id) {
+		console.debug(`[IMDB] Loading ${id}...`)
+		const cached = ls.get(id);
+		if(cached?.rating) {
+			console.debug(`[IMDB] Got from cache ${id}!`)
+			imdb.rating.run({resource: {id: cached.id, title: cached.title, rating: cached.rating, ratingCount: cached.count}})
+			return;
+		}
 		var script = document.createElementNS('http://www.w3.org/2000/svg', 'script');
 		script.setAttributeNS('http://www.w3.org/1999/xlink', 'xlink:href', `https://p.media-imdb.com/static-content/documents/v1/title/${id}/ratings%3Fjsonp=imdb.rating.run:imdb.api.title.ratings/data.json?`);
 		svg.appendChild(script);
