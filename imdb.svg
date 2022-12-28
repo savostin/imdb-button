@@ -5,7 +5,7 @@
 		#rating { transform:translate(95px, 1em); text-anchor: end; font-size: 1.5em; font-weight: bold; letter-spacing: -0.07em; user-select: none; }
 		#logo { transform: translate(7px, 7px); fill: #000000; fill-rule:nonzero; }
 	</style>
-	<g>
+	<a href="#" referrerpolicy="no-referrer" target="_blank" xlink:href="#" id="link">
 		<title id="title"></title>
 		<g fill="#F5C518"><rect x="0" y="0" width="100%" height="100%" rx="6"></rect></g>
 		<g id="logo">
@@ -16,7 +16,7 @@
 		</g>
 		<text id="rating"></text>
 		<text id="count"></text>
-	</g>
+	</a>
 	<script>//<![CDATA[
 const svg = document.getElementById('imdb');
 const compactInteger=function(e,t=0){t=Math.max(t,0);const n=parseInt(e,10),i=n<0?"-":"",r=Math.abs(n),l=String(r),o=l.length,$=[13,10,7,4],a=["T","B","M","k"];if(r<1e3)return`${i}${l}`;if(o>$[0]+3)return n.toExponential(t).replace("e+","x10^");let c;for(let e=0;e<$.length;e++){const t=$[e];if(o>=t){c=t;break}}const s=o-c+1,f=l.split(""),g=f.slice(0,s),h=f.slice(s,s+t+1),x=g.join("");let p,u=h.join("");if(u.length<t&&(u+=`${Array(t-u.length+1).join("0")}`),0===t)p=`${i}${x}${a[$.indexOf(c)]}`;else{p=`${i}${Number(`${x}.${u}`).toFixed(t)}${a[$.indexOf(c)]}`}return p};
@@ -39,9 +39,8 @@ const imdb = {
 				imdb.rating.cur = 0.0;
 				imdb.rating.count = data?.resource?.ratingCount || 0;
 				imdb.rating.go = window.setInterval(imdb.rating.tick, 20);
-				svg.addEventListener("click", (e) => {
-					window.open(`https://imdb.com${data?.resource?.id}`, '_blank', 'noopener,noreferrer').focus();
-				});
+				document.getElementById('link').setAttribute('href', `https://imdb.com${data?.resource?.id}`);
+				document.getElementById('link').setAttributeNS('http://www.w3.org/1999/xlink', 'xlink:href', `https://imdb.com${data?.resource?.id}`);
 				ls.set(imdb.rating.id, {id: data?.resource?.id, title: data?.resource?.title, rating: imdb.rating.rating, count: imdb.rating.count}, {ttl: 24*60*60});
 				console.debug(`[IMDB] Loaded '${data?.resource?.title}': ${imdb.rating.rating} / ${imdb.rating.count} }`)
 			} else {
