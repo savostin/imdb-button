@@ -6,3 +6,15 @@ Unfortunately imcluding SVG with &lt;img&gt; tag doesn't allow script execution.
 ```
 <object type="image/svg+xml" data="imdb.svg?id=[IMDb ID]"></object>
 ```
+
+In additional you can use 
+```
+<object type="image/svg+xml" data="[IMDb ID].svg"></object>
+```
+with something like that in your Nginx config:
+
+```
+<location ~/tt[0-9]+\.svg$>
+	rewrite /(tt[0-9]+)\.svg$ imdb.svg?id=$1& break;
+</location>
+```
